@@ -1,0 +1,24 @@
+[package]
+name = "screen-dump"
+version = "0.1.0"
+edition = "2024"
+build = "build.rs"
+description = "macOS CLI for dumping on-screen windows, bounds, displays, and Accessibility metadata"
+repository = "https://github.com/mostafahagras/screen-dump"
+
+[dependencies]
+libc = "0.2"
+objc2 = "0.6.4"
+objc2-app-kit = "0.3.2"
+objc2-application-services = "0.3.2"
+objc2-core-foundation = "0.3.2"
+objc2-core-graphics = "0.3.2"
+objc2-foundation = "0.3.2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+screencapturekit = { version = "8.0.1", features = ["macos_26_0"] }
+thiserror = "2"
+usage = { package = "usage-rs", version = "6" }
+
+[dev-dependencies]
+usage = { package = "usage-rs", version = "6", features = ["test"] }
