@@ -1,11 +1,17 @@
 use std::path::PathBuf;
 
-use usage::Cli as UsageCli;
+use usage::{Args as UsageArgs, Cli as UsageCli};
 
 /// Dump visible macOS windows, their geometry, and display information.
 #[derive(UsageCli)]
-#[usage(bin = "screen-dump", version = "0.1.0")]
+#[usage(bin = "screen-dump", version = "0.2.0", completion)]
 pub(crate) struct Cli {
+    #[usage(flatten)]
+    pub(crate) args: CliArgs,
+}
+
+#[derive(UsageArgs)]
+pub(crate) struct CliArgs {
     /// Emit JSON instead of the human-readable report.
     #[usage(long)]
     pub(crate) json: bool,
@@ -19,15 +25,27 @@ pub(crate) struct Cli {
     pub(crate) all: bool,
 
     /// Filter by application name or bundle identifier.
-    #[usage(long, value_name = "NAME_OR_BUNDLE_ID")]
+    #[usage(
+        long,
+        value_name = "NAME_OR_BUNDLE_ID",
+        complete = crate::completion::app_candidates
+    )]
     pub(crate) app: Option<String>,
 
     /// Filter by owning process ID.
-    #[usage(long, value_name = "PID")]
+    #[usage(
+        long,
+        value_name = "PID",
+        complete = crate::completion::pid_candidates
+    )]
     pub(crate) pid: Option<i32>,
 
     /// Filter by Core Graphics window ID.
-    #[usage(long, value_name = "ID")]
+    #[usage(
+        long,
+        value_name = "ID",
+        complete = crate::completion::window_candidates
+    )]
     pub(crate) window_id: Option<u32>,
 
     /// Include hidden or minimized windows.

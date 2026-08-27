@@ -11,7 +11,7 @@ use objc2_core_graphics::{
 use thiserror::Error;
 
 use crate::ax::{self, AxElement, AxErrorKind, attributes};
-use crate::cli::Cli;
+use crate::cli::{Cli, CliArgs};
 use crate::model::{ApplicationInfo, DisplayInfo, Rect, Snapshot, WindowInfo};
 use crate::{output, screenshot};
 
@@ -47,7 +47,7 @@ impl Error {
 pub fn run(cli: &Cli) -> Result<(), Error> {
     let mut snapshot = collect(cli)?;
 
-    if let Some(path) = cli.screenshot.as_ref() {
+    if let Some(path) = cli.args.screenshot.as_ref() {
         screenshot::capture_main_display(
             path,
             snapshot.display.as_ref(),
@@ -56,7 +56,7 @@ pub fn run(cli: &Cli) -> Result<(), Error> {
         snapshot.screenshot_path = Some(path.display().to_string());
     }
 
-    output::print(&snapshot, cli.json, cli.verbosity)?;
+    output::print(&snapshot, cli.args.json, cli.args.verbosity)?;
     Ok(())
 }
 
@@ -70,7 +70,7 @@ fn collect(cli: &Cli) -> Result<Snapshot, Error> {
     let single_display = displays.len() == 1;
     let frontmost = frontmost_application();
     let focused_window_id = focused_window_id();
-    let raw_windows = collect_windows(cli)?;
+    let raw_windows = collect_windows(&cli.args)?;
     let mut windows = Vec::with_capacity(raw_windows.len());
 
     for (z_order, raw) in raw_windows.into_iter().enumerate() {
@@ -103,7 +103,7 @@ fn collect(cli: &Cli) -> Result<Snapshot, Error> {
             raw: None,
         };
 
-        enrich_from_ax(&mut record, cli.verbosity);
+        enrich_from_ax(&mut record, cli.args.verbosity);
         windows.push(record);
     }
 
@@ -158,7 +158,7 @@ fn collect_displays() -> Result<Vec<DisplayInfo>, Error> {
         .collect())
 }
 
-fn collect_windows(cli: &Cli) -> Result<Vec<RawWindow>, Error> {
+fn collect_windows(cli: &CliArgs) -> Result<Vec<RawWindow>, Error> {
     let mut options = if cli.all || cli.include_hidden {
         CGWindowListOption::OptionAll
     } else {
@@ -179,10 +179,37 @@ fn collect_windows(cli: &Cli) -> Result<Vec<RawWindow>, Error> {
         .collect()
 }
 
+pub(crate) fn window_completion_candidates() -> Vec<(u32, Option<String>, Option<String>, i32)> {
+    let cli = CliArgs {
+        json: false,
+        screenshot: None,
+        all: false,
+        app: None,
+        pid: None,
+        window_id: None,
+        include_hidden: false,
+        include_system: false,
+        verbosity: 0,
+    };
+
+    collect_windows(&cli)
+        .unwrap_or_default()
+        .into_iter()
+        .map(|window| {
+            (
+                window.window_id,
+                window.title,
+                window.owner_name,
+                window.owner_pid,
+            )
+        })
+        .collect()
+}
+
 fn parse_window(
     entry: &CFDictionary<CFString, CFType>,
     _z_order: usize,
-    cli: &Cli,
+    cli: &CliArgs,
 ) -> Result<Option<RawWindow>, Error> {
     let Some(window_id) =
         number(entry, unsafe { kCGWindowNumber }).and_then(|v| u32::try_from(v).ok())

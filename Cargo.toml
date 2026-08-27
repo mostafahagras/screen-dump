@@ -1,6 +1,6 @@
 [package]
 name = "screen-dump"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2024"
 build = "build.rs"
 description = "macOS CLI for dumping on-screen windows, bounds, displays, and Accessibility metadata"
@@ -19,7 +19,7 @@ serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 screencapturekit = { version = "8.0.1", features = ["macos_26_0"] }
 thiserror = "2"
-usage = { package = "usage-rs", version = "6" }
+usage = { package = "usage-rs", version = "6", features = ["completions"] }
 
 [dev-dependencies]
-usage = { package = "usage-rs", version = "6", features = ["test"] }
+usage = { package = "usage-rs", version = "6", features = ["completions", "test"] }
