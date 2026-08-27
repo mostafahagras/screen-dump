@@ -42,6 +42,8 @@ display coordinates. A single-display snapshot uses a
 compact `display` field; multi-display snapshots use `displays` and include a
 `display_id` on each window.
 
+This project is licensed under the MIT License.
+
 Default filtering keeps user-facing, on-screen, nonzero windows and hides
 desktop shell/system utility windows. Use `--all`, `--include-hidden`, or
 `--include-system` to broaden the result.

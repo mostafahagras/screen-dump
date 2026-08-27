@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2024"
 build = "build.rs"
 description = "macOS CLI for dumping on-screen windows, bounds, displays, and Accessibility metadata"
+license = "MIT"
 repository = "https://github.com/mostafahagras/screen-dump"
 
 [dependencies]
